@@ -1,0 +1,38 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Sat Apr 11 10:49:38 2020
+
+@author: david.turnbull1
+"""
+from rdkit import Chem
+from rdkit.Chem import Draw
+from rdkit.Chem.Draw import IPythonConsole
+from rdkit.Chem import Descriptors
+from rdkit.Chem import AllChem
+from rdkit import DataStructs
+import numpy as np
+m= Chem.MolFromSmiles('%$%$%$') #in the brackets, copy smiles from Chemdraw
+m = Chem.AddHs(m)
+m  #Use this to see if the molecule looks correct, it will be a digital output.
+AllChem.EmbedMolecule(m)
+AllChem.UFFOptimizeMolecule(m, maxIters=50) #these two lines convert the structure from 2D to 3D
+m #to see the predicted structure structure
+v = 'name'#chose name for the file
+file=open(v+'.txt','w+')
+file.write('%mem=40GB\n') #settings for calc
+file.write('#opt b3lyp/6-31g(d,p)\n\n') #actual settings for calc
+file.write('PDI\n\n') #the title card required for calc
+file.write('0 1\n')#charge and multiplicity
+f=Chem.MolToXYZBlock(m)
+file.write(f)
+file.close
+file=open(v+'.txt','r+')
+lines= file.readlines()
+del lines[6]
+del lines[6]
+with open(v+'.com','w') as file:
+    for line in lines:
+        file.write("%s" % line)
+    file.write(" ")
+file.close() #file will be in same area as rdkit
