@@ -1,0 +1,79 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Wed May 27 08:11:23 2020
+
+@author: david.turnbull1
+"""
+
+from rdkit import Chem
+from rdkit.Chem import Draw
+from rdkit.Chem.Draw import IPythonConsole
+from rdkit.Chem import Descriptors
+from rdkit.Chem import AllChem
+from rdkit import DataStructs
+import numpy as np
+import pandas as pd
+#!ls to see what is in current directory, if csv file not there, move to the correct directory
+#cd python 
+#cd rdkit the cd command changes directory
+
+endcap= pd.read_csv(r'filename.csv') #csv file which contains strings for combining
+a = {} #dictionary to store smile strings from csv file
+k=0
+while k<5:
+    key = k
+    value = endcap.Smiles[key]
+    a[key]=value
+    k+=1
+b={} #the dictionary that will contain the product molecule
+k=0
+c = Chem.MolFromSmiles('$%$%$%$%') #Smile of the unit you will be attaching too
+rxn = AllChem.ReactionFromSmarts("Br[*:1].[Y][*:2]>>[*:1][*:2]") #This shows how the connections will happen, replacing the bromine with the group from the Y dummy group
+while k<5:
+    d = a[k] #getting the endcap from dictionary
+    e = Chem.MolFromSmiles(d) #makes molecule from smiles in first dictionary
+    results1=rxn.RunReactants([c,e]) #this allows for the first addition of the group to occur
+    for products in results1:
+        for mol in products:
+            m1=mol
+    results2 =rxn.RunReactants([m1,e]) #use as many times as needed until correct number of groups obtained.
+    for products in results2:
+        for mol in products: 
+            m2=mol
+            b[k] = m2 #product wanted
+            k+=1 #here is the end of the first section which produces dictionary of values
+            
+k=0
+while k<5:
+    z = b[k]
+    y = Chem.MolToSmiles(z)
+    y2= Chem.MolFromSmiles(y)
+    y3 = Chem.AddHs(y2)
+    b[k] = y3
+    k+=1  # This section allows for the addition of hydrogen onto the molecule as smarts(used in the reaction) does not allow this function
+    
+k=0                
+while k<5:
+    AllChem.EmbedMolecule(b[k])
+    AllChem.MMFFOptimizeMolecule(b[k], maxIters=10)
+    v = 'name'+str(k) #dynamic naming to allow for multiple file generation
+    file=open(v+'.txt','w+')
+    file.write('%mem=40GB\n') #settings for calc
+    file.write('#opt b3lyp/6-31g(d,p)\n\n') #actual settings for calc
+    file.write('PDI\n\n') #the title card required for calc
+    file.write('0 1\n')#charge and multiplicity
+    f=Chem.MolToXYZBlock(b[k])
+    file.write(f)
+    file.close
+    file=open(v+'.txt','r+')
+    lines= file.readlines()
+    del lines[6]
+    del lines[6]
+    with open(v+'.com','w') as file:
+        for line in lines:
+            file.write("%s" % line)
+        file.write(" ")
+    file.close() #this produces your file for DFT
+    k+=1
+   
