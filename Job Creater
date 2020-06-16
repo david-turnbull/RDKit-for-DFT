@@ -1,0 +1,35 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Thu Jun 11 07:21:03 2020
+
+@author: david.turnbull1
+"""
+
+from rdkit import Chem
+from rdkit.Chem import Draw
+from rdkit.Chem.Draw import IPythonConsole
+from rdkit.Chem import Descriptors
+from rdkit.Chem import AllChem
+from rdkit import DataStructs
+import numpy as np
+import pandas as pd
+file=open('name.slurm','w+') #change name to filename wanted
+file.write('#!/bin/bash\n') #needed to create slurm
+file.write('#SBATCH --partition cpu2019\n') #what node you want 
+file.write('#SBATCH --cpus-per-task 40\n') #how many cpus
+file.write('#SBATCH --mem 60G\n')#amount of mem (typically 1.5 whats in .com files)
+file.write('#SBATCH --time 200:00:00\n')#time
+file.write('#SBATCH --job-name name\n\n')#name of job
+file.write('module load Gaussian16/b01-nehalem\n')#loading Gaussian
+file.write('echo "Starting run at: `date`"\n')
+k=0
+while k<100: #change to amount of files you have
+    v= 'pdi'+str(k)
+    v2 = v+'.com'
+    v3= v+'.log'
+    file.write('g16 '+v2+ ' '+v3+'\n')
+    k+=1
+file.write('echo "Program finished with exit code $? at: `date`"\n')
+file.write('exit 0')
+file.close()
